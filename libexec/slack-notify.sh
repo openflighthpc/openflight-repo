@@ -9,7 +9,7 @@ msg="
 cat <<EOF | curl --data @- -X POST -H "Authorization: Bearer $SLACK_TOKEN" -H 'Content-Type: application/json' https://slack.com/api/chat.postMessage
 {
   "text": "$msg",
-  "channel": "markt-test",
+  "channel": "packaging",
   "as_user": true
 }
 EOF
