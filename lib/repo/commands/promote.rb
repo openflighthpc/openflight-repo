@@ -41,7 +41,6 @@ module Repo
         prod.download
         sources.each do |s|
           prod.add(s)
-          prod.prune(source) unless options.dry_run
         end
         prod.index
         unless options.dry_run
