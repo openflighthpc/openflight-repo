@@ -40,7 +40,7 @@ module Repo
         end
         dev.index
         unless options.dry_run
-          #dev.upload
+          dev.upload
         end
       end
 

@@ -43,8 +43,8 @@ module Repo
         prod.index
         vault.index
         unless options.dry_run
-          #prod.upload
-          #prod.upload
+          vault.upload
+          prod.upload
         end
       end
 

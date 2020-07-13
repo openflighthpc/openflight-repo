@@ -48,7 +48,7 @@ module Repo
         end
         repo.index
         unless options.dry_run
-          #repo.upload
+          repo.upload
           files.each do |f|
             Slack.say(
               File.basename(f),
