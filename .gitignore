@@ -1,0 +1,7 @@
+*~
+tmp
+.bundle
+vendor
+var
+etc/*.yml
+!etc/openflight.yml

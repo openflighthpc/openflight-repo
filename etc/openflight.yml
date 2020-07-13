@@ -1,0 +1,19 @@
+---
+profile: default
+region: eu-west-1
+repos:
+  dev:
+    prefix: "repo.openflighthpc.org/openflight-dev"
+    label: "OpenFlightHPC Development Packages"
+  prod:
+    prefix: "repo.openflighthpc.org/openflight"
+    label: "OpenFlightHPC Packages"
+  vault:
+    prefix: "repo.openflighthpc.org/openflight-vault"
+    label: "OpenFlightHPC Vault Packages"
+arch:
+  ubuntu:
+    - amd64
+  centos:
+    - x86_64
+    - aarch64
