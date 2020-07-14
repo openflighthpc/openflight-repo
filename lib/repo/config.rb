@@ -127,6 +127,30 @@ module Repo
             default: {}
           )[ubuntu? ? 'ubuntu' : 'centos'] || []
       end
+
+      def emoji
+        @emoji ||=
+          data.fetch(
+            'emoji',
+            default: ':gift:'
+          )
+      end
+
+      def builder_repo
+        @builder_repo ||=
+          data.fetch(
+            'builder_repo',
+            default: 'openflighthpc/openflight-omnibus-builder'
+          )
+      end
+
+      def name
+        @name ||=
+          data.fetch(
+            'name',
+            default: 'OpenFlight'
+          )
+      end
     end
   end
 end

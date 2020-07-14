@@ -36,13 +36,18 @@ module Repo
         end
       end
 
-      def say(package, repo, package_url)
+      def say(package, repo, repo_url, package_url, production)
         print "Sending Slack publication notification... "
         IO.popen(
           {
             'PACKAGE' => package,
             'REPO' => repo,
+            'REPO_S3_URL' => repo_url,
             'PACKAGE_URL' => package_url,
+            'NAME' => Config.name,
+            'BUILDER_REPO' => Config.builder_repo,
+            'EMOJI' => Config.emoji,
+            'PRODUCTION' => production.to_s,
           },
           File.join(Config.root, 'libexec', 'slack-notify.sh'),
           :err=>[:child, :out]

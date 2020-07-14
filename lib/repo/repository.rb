@@ -62,6 +62,27 @@ module Repo
       @bucket_path ||= "#{prefix}/#{distro_path}/#{arch.path}"
     end
 
+    def package_root_url
+      @bucket_url ||= begin
+                        bucket, path_prefix = prefix.split('/',2)
+                        if bucket.include?('.')
+                          [
+                            "https://#{bucket}",
+                            path_prefix,
+                            distro_path,
+                            arch.path
+                          ]
+                        else
+                          [
+                            "https://#{bucket}.s3.#{Config.region}.amazonaws.com",
+                            path_prefix,
+                            distro_path,
+                            arch.path
+                          ]
+                        end.join('/')
+                      end
+    end
+
     def wd
       @wd ||= "/tmp/#{bucket_path}"
     end
@@ -158,6 +179,7 @@ EOF
         end
       end
       puts "\n---------------------------------------" unless @terse
+      raise RepoError, "command failed: #{cmd}" unless $?.success?
     end
 
     def distro_path

@@ -5,7 +5,14 @@ if [ -z "$1" ]; then
 fi
 
 pushd "$(dirname "$1")"/.. >& /dev/null
-changes=$(git status --porcelain . | wc -l)
+porc="$(git status --porcelain .)"
+rc=$?
+echo rc: $rc
+if [ $rc -gt 0 ]; then
+  echo $rc
+  exit $rc
+fi
+changes=$(echo -n "$porc" | wc -l)
 if [ "$changes" -gt 0 ]; then
   echo "Uncommitted changes detected:"
   echo ""

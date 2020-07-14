@@ -1,4 +1,7 @@
 ---
+name: "OpenFlight"
+builder_repo: 'openflighthpc/openflight-omnibus-builder'
+emoji: ':openflight:'
 profile: default
 region: eu-west-1
 repos:

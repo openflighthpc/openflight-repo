@@ -1,10 +1,18 @@
 #!/bin/bash
-msg="
-:gift: _Package Published_ :gift:\n
+if [ "$PRODUCTION" == "true" ]; then
+  msg="
+:star: $EMOJI _$NAME Package Released_ $EMOJI\n
 *Name:* \`$PACKAGE\`\n
-*Repo:* \`$REPO\`\n
-*Tree:* https://github.com/openflighthpc/openflight-omnibus-builder/commit/$(git rev-parse --short HEAD)\n
-*Package URL:* $PACKAGE_URL"
+*Repo:* <$REPO_S3_URL|\`$REPO\`>\n
+*URL:* $PACKAGE_URL"
+else
+  msg="
+:soon: $EMOJI _$NAME Dev Package Published_ $EMOJI\n
+*Name:* \`$PACKAGE\`\n
+*Repo:* <$REPO_S3_URL|\`$REPO\`>\n
+*Tree:* https://github.com/$BUILDER_REPO/tree/$(git rev-parse --short HEAD)\n
+*URL:* $PACKAGE_URL"
+fi
 
 cat <<EOF | curl --data @- -X POST -H "Authorization: Bearer $SLACK_TOKEN" -H 'Content-Type: application/json' https://slack.com/api/chat.postMessage
 {

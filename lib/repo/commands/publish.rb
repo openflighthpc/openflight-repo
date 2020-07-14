@@ -52,8 +52,10 @@ module Repo
           files.each do |f|
             Slack.say(
               File.basename(f),
-              "#{Config.distro}:#{arch.name}",
-              "https://#{repo.bucket_path}/#{File.basename(f)}"
+              "#{Config.name.downcase.tr(' ','-')}-dev/#{Config.distro} (#{arch.name})",
+              "https://s3.console.aws.amazon.com/s3/buckets/#{repo.bucket_path}/",
+              "#{repo.package_root_url}/#{File.basename(f)}",
+              false
             )
           end
         end
