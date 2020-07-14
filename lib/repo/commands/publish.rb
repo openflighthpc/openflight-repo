@@ -111,7 +111,7 @@ module Repo
       end
 
       def clean_git?
-        files.each do |f|
+        files.all? do |f|
           system(File.join(Config.root, 'libexec', 'committed-check.sh'), f)
         end
       end
