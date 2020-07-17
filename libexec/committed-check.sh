@@ -7,7 +7,6 @@ fi
 pushd "$(dirname "$1")"/.. >& /dev/null
 porc="$(git status --porcelain .)"
 rc=$?
-echo rc: $rc
 if [ $rc -gt 0 ]; then
   echo $rc
   exit $rc
