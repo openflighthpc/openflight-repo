@@ -162,6 +162,12 @@ EOF
     def upload
       cmd = %(aws --profile #{Config.profile} --region #{Config.region} s3 sync --delete #{wd} s3://#{bucket_path} --acl public-read)
       run(cmd)
+      if Config.ubuntu?
+        cmd = %(aws --profile #{Config.profile} --region #{Config.region} s3 cp #{wd}/../../Release s3://#{prefix}/#{distro_path}/Release --acl public-read)
+        run(cmd)
+        cmd = %(aws --profile #{Config.profile} --region #{Config.region} s3 cp #{wd}/../../InRelease s3://#{prefix}/#{distro_path}/InRelease --acl public-read)
+        run(cmd)
+      end
     end
 
     def list
