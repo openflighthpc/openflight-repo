@@ -137,5 +137,14 @@ EOF
       c.option '--any', 'Show any stale packages, not just minor release multiples'
       c.option '--terse', 'Suppress everything but package names'
     end
+
+    command :'run-release' do |c|
+      cli_syntax(c, 'FILE')
+      c.summary = 'Build, publish and promote the packages given by FILE'
+      c.action Commands, :run_release
+      c.description = <<EOF
+Build, publish and promote the packages given by FILE
+EOF
+    end
   end
 end

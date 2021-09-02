@@ -29,6 +29,7 @@ require_relative 'commands/list'
 require_relative 'commands/promote'
 require_relative 'commands/publish'
 require_relative 'commands/reindex'
+require_relative 'commands/run_release'
 require_relative 'commands/stale'
 require_relative 'commands/vault'
 
