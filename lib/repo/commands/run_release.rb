@@ -39,6 +39,7 @@ module Repo
         if !Slack.auth?
           raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
         end
+        assert_arch
 
         packages.each do |package|
           remove_artefacts(package)
@@ -57,19 +58,18 @@ module Repo
         if File.exist?(args[0])
           YAML.load_file(args[0])
         else
-          raise RuntimeError, "file #{args[0]} not found"
+          raise RepoError, "file #{args[0]} not found"
         end
       end
 
       def remove_artefacts(package)
-        # XXX Remove *el7* hardcoding.
         header "Removing build artefacts #{package['name']}"
         Dir.chdir("/vagrant/builders/#{package['name']}") do
-          cmd = ["rm", "-rf", "pkg/*el7*"]
+          cmd = ["rm", "-rf", "pkg/#{pkg_glob}*"]
           out, status = Open3.capture2(*cmd)
           puts out
           unless status.success?
-            raise RuntimeError, "Failed to remove artefacts #{package['name']}"
+            raise RepoError, "Failed to remove artefacts #{package['name']}"
           end
         end
       end
@@ -79,11 +79,11 @@ module Repo
 
         header "Cleaning package #{package['name']}"
         Dir.chdir("/vagrant/builders/#{package['name']}") do
-          cmd = ["./bin/omnibus", "clean", package['name']]
+          cmd = ["./bin/omnibus", "clean", "--purge", package['name']]
           out, status = Open3.capture2(*cmd)
           puts out
           unless status.success?
-            raise RuntimeError, "Failed to clean #{package['name']}"
+            raise RepoError, "Failed to clean #{package['name']}"
           end
         end
       end
@@ -100,46 +100,36 @@ module Repo
           out, status = Open3.capture2(*cmd)
           puts out
           unless status.success?
-            raise RuntimeError, "Failed to build #{package['name']}"
+            raise RepoError, "Failed to build #{package['name']}"
           end
-          # XXX Remove *el7* hardcoding.
-          built =
-            if package['noarch']
-              Dir.glob("pkg/#{package['name']}?#{package['version']}*.noarch.*rpm")
-            else
-              Dir.glob("pkg/#{package['name']}?#{package['version']}*.el7.*rpm")
-            end
+          built = Dir.glob("pkg/#{package['name']}?#{package['version']}#{pkg_glob}")
           if built.empty?
-            raise RuntimeError, "Failed to build expected version #{package['name']} #{package['version']}. Found #{built.join(' ')}"
+            raise RepoError, "Failed to build expected version #{package['name']} #{package['version']}. Found #{built.join(' ')}"
           end
         end
       end
 
       def publish(package)
-        # XXX Remove *el7* hardcoding.
-        # XXX Remove *x86_64* hardcoding.
         Dir.chdir("/vagrant/builders/#{package['name']}") do
-          Dir.glob("pkg/flight-*.el7.x86_64.rpm").each do |p|
-            cmd = ["/vagrant/scripts/repo", "publish", "-a", "x86_64", p]
+          Dir.glob("pkg/flight-#{pkg_glob}").each do |p|
+            cmd = ["/vagrant/scripts/repo", "publish", "-a", arch, p]
             out, status = Open3.capture2(*cmd)
             puts out
             unless status.success?
-              raise RuntimeError, "Failed to publish #{package['name']}"
+              raise RepoError, "Failed to publish #{package['name']}"
             end
           end
         end
       end
 
       def promote(package)
-        # XXX Remove *el7* hardcoding.
-        # XXX Remove *x86_64* hardcoding.
         Dir.chdir("/vagrant/builders/#{package['name']}") do
-          Dir.glob("pkg/flight-*.el7.x86_64.rpm").each do |p|
-            cmd = ["/vagrant/scripts/repo", "promote", "-a", "x86_64", p]
+          Dir.glob("pkg/flight-#{pkg_glob}").each do |p|
+            cmd = ["/vagrant/scripts/repo", "promote", "-a", arch, p]
             out, status = Open3.capture2(*cmd)
             puts out
             unless status.success?
-              raise RuntimeError, "Failed to promote #{package['name']}"
+              raise RepoError, "Failed to promote #{package['name']}"
             end
           end
         end
@@ -152,6 +142,31 @@ module Repo
         puts("=" * text.length)
         puts
       end
+
+      def pkg_glob
+        case Config.distro
+        when 'centos/7'
+          '*.el7.*rpm'
+        when 'centos/8'
+          '*.el8.*rpm'
+        when 'ubuntu'
+          '*.deb'
+        else
+          raise RepoError, "unknown distro #{Config.distro}"
+        end
+      end
+
+      def arch
+        @arch ||=
+          if options.arch
+            Arch.get(options.arch)
+          elsif Config.arch.length == 1
+            Arch.get(Config.arch[0])
+          else
+            raise RepoError, "must specify architecture; choose from: #{Config.arch.join(', ')}"
+          end
+      end
+      alias_method :assert_arch, :arch
     end
   end
 end
