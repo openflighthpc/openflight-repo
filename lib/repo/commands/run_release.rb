@@ -176,6 +176,7 @@ module Repo
       end
 
       def build(package)
+        logger.info("Building #{package.name} (#{package.version})")
         header "Building package #{package.name}"
         Dir.chdir(package.dir) do
           cmd =
@@ -212,6 +213,7 @@ module Repo
       end
 
       def publish(package)
+        logger.info("Publishing #{package.name} (#{package.version})")
         package.build_artefacts.each do |p|
           cmd = ["/vagrant/scripts/repo", "publish", "-a", arch, p]
           out, status = Open3.capture2(*cmd)
@@ -225,6 +227,7 @@ module Repo
       end
 
       def promote(package)
+        logger.info("Promoting #{package.name} (#{package.version})")
         package.built_package_names.each do |p|
           cmd = ["/vagrant/scripts/repo", "promote", "-a", arch, p]
           out, status = Open3.capture2(*cmd)
