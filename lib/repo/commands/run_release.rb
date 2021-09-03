@@ -101,10 +101,8 @@ module Repo
         def distro_glob
           case Config.distro
           when 'centos/7'
-            # XXX match '*noarch.rpm' too.
             "*.el7.#{@arch.name}.rpm"
           when 'centos/8'
-            # XXX match '*noarch.rpm' too.
             "*.el8.#{@arch.name}.rpm"
           when 'ubuntu'
             '*.deb'
@@ -126,15 +124,12 @@ module Repo
             clean(package)
             build(package)
           end
-          if options.publish && !package.published && !package.skip
-            publish(package)
-          end
         end
-
-        if options.promote && !package.promoted && !package.skip
-          packages.each do |package|
-            promote(package)
-          end
+        if options.publish
+          publish(packages.reject { |p| p.published || p.skip })
+        end
+        if options.promote
+          promote(packages.reject { |p| p.promoted || p.skip })
         end
       ensure
         logger.close
@@ -212,32 +207,44 @@ module Repo
         package.built = true
       end
 
-      def publish(package)
-        logger.info("Publishing #{package.name} (#{package.version})")
-        package.build_artefacts.each do |p|
-          cmd = ["/vagrant/scripts/repo", "publish", "-a", arch, p]
-          out, status = Open3.capture2(*cmd)
-          puts out
-          unless status.success?
-            raise RepoError, "Failed to publish #{package.name}"
-          end
-          logger.info("Published #{p}")
+      def publish(packages)
+        packages.each do |package|
+          logger.info("Publishing #{package.name} (#{package.version})")
         end
-        package.published = true
+
+        artefacts = packages.map(&:build_artefacts).flatten
+        cmd = ["/vagrant/scripts/repo", "publish", "-a", arch.name] + artefacts
+        out, status = Open3.capture2(*cmd)
+        puts out
+        unless status.success?
+          raise RepoError, "Failed to publish"
+        end
+        artefacts.each do |p|
+          logger.info("Published #{File.basename(p)}")
+        end
+        packages.each do |package|
+          package.published = true
+        end
       end
 
-      def promote(package)
-        logger.info("Promoting #{package.name} (#{package.version})")
-        package.built_package_names.each do |p|
-          cmd = ["/vagrant/scripts/repo", "promote", "-a", arch, p]
-          out, status = Open3.capture2(*cmd)
-          puts out
-          unless status.success?
-            raise RepoError, "Failed to promote #{package.name}"
-          end
+      def promote(packages)
+        packages.each do |package|
+          logger.info("Promoting #{package.name} (#{package.version})")
+        end
+
+        built_packages = packages.map(&:built_package_names).flatten
+        cmd = ["/vagrant/scripts/repo", "promote", "-a", arch.name] + built_packages
+        out, status = Open3.capture2(*cmd)
+        puts out
+        unless status.success?
+          raise RepoError, "Failed to promote"
+        end
+        built_packages.each do |p|
           logger.info("Promoted #{p}")
         end
-        package.promoted = true
+        packages.each do |package|
+          package.promoted = true
+        end
       end
 
       def header(text)
