@@ -39,13 +39,18 @@ module Repo
 
       # The package that is being built.
       class TargetPackage
-        attr_reader :name, :version, :build_type
+        attr_reader :build_type, :name, :skip, :version
+        attr_accessor :built, :published, :promoted
 
         def initialize(hash, arch)
-          @name = hash['name']
-          @version = hash['version']
           @build_type = hash['build_type'] || 'omnibus'
-          @arch = arch
+          @built      = hash['built']
+          @name       = hash['name']
+          @promoted   = hash['promoted']
+          @published  = hash['published']
+          @skip       = hash['skip']
+          @version    = hash['version']
+          @arch       = arch
         end
 
         # Paths to the built package files to publish.
@@ -60,6 +65,17 @@ module Repo
 
         def dir
           "/vagrant/builders/#{name}"
+        end
+
+        def serializable_hash
+          {
+            'name' => name,
+            'version' => version,
+            'build_type' => build_type,
+            'built' => built,
+            'published' => published,
+            'promoted' => promoted,
+          }
         end
 
         private
@@ -105,30 +121,32 @@ module Repo
         assert_arch
 
         packages.each do |package|
-          if options.build
+          if options.build && !package.built && !package.skip
             remove_artefacts(package)
             clean(package)
             build(package)
           end
-          if options.publish
+          if options.publish && !package.published && !package.skip
             publish(package)
           end
         end
 
-        if options.promote
+        if options.promote && !package.promoted && !package.skip
           packages.each do |package|
             promote(package)
           end
         end
       ensure
         logger.close
+        File.write(args[0], packages.map(&:serializable_hash).to_yaml)
       end
 
       private
 
       def packages
+        return @packages if @packages
         if File.exist?(args[0])
-          YAML.load_file(args[0]).map { |p| TargetPackage.new(p, arch) }
+          @packages = YAML.load_file(args[0]).map { |p| TargetPackage.new(p, arch) }
         else
           raise RepoError, "file #{args[0]} not found"
         end
@@ -190,6 +208,7 @@ module Repo
           end
           puts
         end
+        package.built = true
       end
 
       def publish(package)
@@ -202,6 +221,7 @@ module Repo
           end
           logger.info("Published #{p}")
         end
+        package.published = true
       end
 
       def promote(package)
@@ -214,6 +234,7 @@ module Repo
           end
           logger.info("Promoted #{p}")
         end
+        package.promoted = true
       end
 
       def header(text)
