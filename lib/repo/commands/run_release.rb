@@ -31,6 +31,7 @@ require_relative '../slack'
 
 require 'yaml'
 require 'open3'
+require 'logger'
 
 module Repo
   module Commands
@@ -119,6 +120,8 @@ module Repo
             promote(package)
           end
         end
+      ensure
+        logger.close
       end
 
       private
@@ -183,6 +186,7 @@ module Repo
           subheader "Built the following"
           package.built_package_names.each do |p|
             puts "  #{p}"
+            logger.info("Built #{p}")
           end
           puts
         end
@@ -196,6 +200,7 @@ module Repo
           unless status.success?
             raise RepoError, "Failed to publish #{package.name}"
           end
+          logger.info("Published #{p}")
         end
       end
 
@@ -207,6 +212,7 @@ module Repo
           unless status.success?
             raise RepoError, "Failed to promote #{package.name}"
           end
+          logger.info("Promoted #{p}")
         end
       end
 
@@ -236,6 +242,12 @@ module Repo
           end
       end
       alias_method :assert_arch, :arch
+
+      def logger
+        return @logger if @logger
+        file = File.open('/vagrant/run_release_built_packages.log', File::WRONLY | File::APPEND | File::CREAT)
+        @logger = Logger.new(file, level: 'INFO')
+      end
     end
   end
 end
