@@ -145,6 +145,9 @@ EOF
       c.description = <<EOF
 Build, publish and promote the packages given by FILE
 EOF
+      c.option '--build', 'Build the packages'
+      c.option '--publish', 'Publish packages to dev repos'
+      c.option '--promote', 'Promote packages to production repos'
     end
   end
 end
