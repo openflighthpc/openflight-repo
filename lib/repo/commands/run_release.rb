@@ -276,7 +276,10 @@ module Repo
 
       def logger
         return @logger if @logger
-        file = File.open('/vagrant/run_release_built_packages.log', File::WRONLY | File::APPEND | File::CREAT)
+        file = File.open(
+          "/vagrant/run_release.#{Config.distro}.log",
+          File::WRONLY | File::APPEND | File::CREAT
+        )
         @logger = Logger.new(file, level: 'INFO')
       end
     end
