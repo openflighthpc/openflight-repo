@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of OpenFlight Omnibus Builder.
 #
@@ -64,7 +64,7 @@ module Repo
         end
 
         def dir
-          "/vagrant/builders/#{name}"
+          File.join(Config.source_package_root, name)
         end
 
         def serializable_hash
@@ -213,7 +213,7 @@ module Repo
         end
 
         artefacts = packages.map(&:build_artefacts).flatten
-        cmd = ["/vagrant/scripts/repo", "publish", "-a", arch.name] + artefacts
+        cmd = [Config.repo_command, "publish", "-a", arch.name] + artefacts
         out, status = Open3.capture2(*cmd)
         puts out
         unless status.success?
@@ -233,7 +233,7 @@ module Repo
         end
 
         built_packages = packages.map(&:built_package_names).flatten
-        cmd = ["/vagrant/scripts/repo", "promote", "-a", arch.name] + built_packages
+        cmd = [Config.repo_command, "promote", "-a", arch.name] + built_packages
         out, status = Open3.capture2(*cmd)
         puts out
         unless status.success?
