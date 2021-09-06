@@ -187,11 +187,11 @@ EOF
       re = /\A
         (?<name>.+)
         -
-        (?<version>[0-9][.0-9]*(~[^-]+)?)
+        (?<version>[^-]+)
         -
-        (?<release>.*)
+        (?<release>[^-]+)
         \.
-        (?<arch>[-_a-z0-9]+)
+        (?<arch>[^.]+)
         \.rpm
       \Z/x
       names.sort_by do |name|
