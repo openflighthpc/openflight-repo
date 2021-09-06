@@ -171,7 +171,39 @@ EOF
     end
 
     def list
-      Dir.glob(File.join(wd, "*#{Config.extname}")).map(&File.method(:basename)).sort
+      names = Dir.glob(File.join(wd, "*#{Config.extname}")).map(&File.method(:basename))
+      if Config.extname == '.rpm'
+        # The dev RPM repos might contain release candidates.  Sorting them
+        # correctly is more complicated.  The complicated sorting method
+        # is limited to RPM repos to avoid having to write a version that
+        # works correctly for .deb files.
+        semantic_version_sort(names)
+      else
+        names.sort
+      end
+    end
+
+    # Sort RPM names such that obeys RC releases, e.g., `1.0.0~rc1-1` appears
+    # before `1.0.0-1`.
+    def semantic_version_sort(names)
+      # This could be done by run `rpm -qp --queryformat
+      # '%{Name}\n%{Version}\n%{Release}` <package>`, but that is *much*
+      # slower than a regex.
+      re = /\A
+        (?<name>.+)
+        -
+        (?<version>[^-]+)
+        -
+        (?<release>[^-]+)
+        \.
+        (?<arch>[^.]+)
+        \.rpm
+      \Z/x
+      names.sort_by do |name|
+        md = name.match(re)
+        version = md['version'].sub('~', '-')
+        [ md['name'], Gem::Version.create(version), md['release'] ]
+      end
     end
 
     def run(cmd)
