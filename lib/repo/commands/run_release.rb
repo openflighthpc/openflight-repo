@@ -121,6 +121,7 @@ module Repo
         packages.each do |package|
           if options.build && !package.built && !package.skip
             remove_artefacts(package)
+            install_deps(package) if options.build_deps
             clean(package)
             build(package)
           end
@@ -152,6 +153,20 @@ module Repo
         package.build_artefacts.each do |p|
           unless FileUtils.rm_f(p, verbose: true)
             raise RepoError, "Failed to remove artefacts #{package.name}"
+          end
+        end
+      end
+
+      def install_deps(package)
+        return unless package.build_type == 'omnibus'
+
+        header "Installing build dependencies package #{package.name}"
+        Dir.chdir(package.dir) do
+          cmd = ["bundle", "install"]
+          out, status = Open3.capture2(*cmd)
+          puts out
+          unless status.success?
+            raise RepoError, "Failed to install build deps #{package.name}"
           end
         end
       end
