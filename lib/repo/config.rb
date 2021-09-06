@@ -151,6 +151,22 @@ module Repo
             default: 'OpenFlight'
           )
       end
+
+      def source_package_root
+        @source_package_root ||=
+          data.fetch(
+            'source_package_root',
+            default: '/vagrant/builders'
+          )
+      end
+
+      def repo_command
+        @repo_command ||=
+          data.fetch(
+            'repo_command',
+            default: '/vagrant/scripts/repo'
+        )
+      end
     end
   end
 end

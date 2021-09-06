@@ -137,5 +137,29 @@ EOF
       c.option '--any', 'Show any stale packages, not just minor release multiples'
       c.option '--terse', 'Suppress everything but package names'
     end
+
+    command :'run-release' do |c|
+      cli_syntax(c, 'FILE [--build|--publish|--promote]')
+      c.summary = 'Build, publish and/or promote the packages given in FILE'
+      c.action Commands, :run_release
+      c.description = <<EOF
+Build, publish and promote the packages given by FILE
+
+FILE is expected to be a YAML file containing a list of package names, build
+type and expected version.  E.g.,
+
+```
+- name: flight-desktop
+  version: 1.7.0-1
+  build_type: omnibus
+- name: flight-desktop-types
+  version: 1.1.0-1
+  build_type: build.sh
+```
+EOF
+      c.option '--build', 'Build the specified packages'
+      c.option '--publish', 'Publish packages to dev repos'
+      c.option '--promote', 'Promote packages to production repos'
+    end
   end
 end
