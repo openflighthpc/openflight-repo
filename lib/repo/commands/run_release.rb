@@ -113,10 +113,9 @@ module Repo
       end
 
       def run
-        if !Slack.auth?
-          raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
-        end
+        assert_slack_token
         assert_arch
+        assert_action_given
 
         packages.each do |package|
           if options.build && !package.built && !package.skip
@@ -277,10 +276,22 @@ module Repo
       def logger
         return @logger if @logger
         file = File.open(
-          "/vagrant/run_release.#{Config.distro}.log",
+          "/vagrant/run_release.#{Config.distro.gsub('/', '')}.log",
           File::WRONLY | File::APPEND | File::CREAT
         )
         @logger = Logger.new(file, level: 'INFO')
+      end
+
+      def assert_action_given
+        unless options.build || options.publish || options.promote
+          raise RepoError, "must specify at least one of --build, --publish or --promote"
+        end
+      end
+
+      def assert_slack_token
+        if !Slack.auth?
+          raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
+        end
       end
     end
   end
