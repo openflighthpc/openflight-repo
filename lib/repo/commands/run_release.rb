@@ -63,6 +63,13 @@ module Repo
           build_artefacts.map { |p| File.basename(p) }
         end
 
+        # The names of all packages regardless of version.
+        def all_package_names
+          (
+            Dir.glob("#{dir}/pkg/flight-*#{distro_glob}") + noarch_packages
+          ).map { |p| File.basename(p) }
+        end
+
         def dir
           File.join(Config.source_package_root, name)
         end
@@ -193,7 +200,7 @@ module Repo
             p.match(/#{package.name}[-_]#{package.version}/)
           end
           unless found_expected
-            raise RepoError, "Failed to build expected version #{package.name}-#{package.version}. Found #{package.built_package_names.join(' ')}"
+            raise RepoError, "Failed to build expected version #{package.name}-#{package.version}. Found #{package.all_package_names.join(' ')}"
           end
 
           subheader "Built the following"
