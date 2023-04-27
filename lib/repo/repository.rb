@@ -125,7 +125,11 @@ module Repo
     def index
       if Config.rhel?
         update = File.exist?(File.join(wd, 'repodata', 'repomd.xml'))
-        cmd = %(createrepo -v #{update ? '--update ' : ''} --deltas #{wd})
+        if Config.distro == "centos/9" # RHEL 9 doesn't have `drpm` in repos
+          cmd = %(createrepo -v #{update ? '--update ' : ''} #{wd})
+        else
+          cmd = %(createrepo -v #{update ? '--update ' : ''} --deltas #{wd})
+        end
         run(cmd)
       elsif Config.ubuntu?
         # create a list of packages, allowing multiple versions
