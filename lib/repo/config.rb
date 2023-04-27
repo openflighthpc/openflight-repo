@@ -65,6 +65,8 @@ module Repo
               s << '7'
             elsif system('grep -q "release 8" /etc/redhat-release >& /dev/null')
               s << '8'
+            elsif system('grep -q "release 9" /etc/redhat-release >& /dev/null')
+              s << '9'
             else
               raise RepoError, "unable to determine distro: unknown CentOS release?"
             end
