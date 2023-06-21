@@ -93,9 +93,11 @@ module Repo
           exclude =
             case Config.distro
             when 'centos/7'
-              /\.el8\./
+              /\.el[^7]\./
             when 'centos/8'
-              /\.el7\./
+              /\.el[^8]\./
+            when 'centos/9'
+              /\.el[^9]\./
             end
 
           Dir.glob("#{dir}/pkg/flight-*#{version}*noarch*.rpm").select do |p|
@@ -111,6 +113,8 @@ module Repo
             "*.el7.#{@arch.name}.rpm"
           when 'centos/8'
             "*.el8.#{@arch.name}.rpm"
+          when 'centos/9'
+            "*.el9.#{@arch.name}.rpm"
           when 'ubuntu'
             '*.deb'
           else
