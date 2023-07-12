@@ -149,6 +149,15 @@ module Repo
 
       private
 
+      def with_unbundled_env
+        bundler_ver = Gem::Version.new(Bundler::VERSION)
+        if bundler_ver < Gem::Version.new('2.1.0')
+          Bundler.with_clean_env { yield }
+        else
+          Bundler.with_unbundled_env { yield }
+        end
+      end
+
       def packages
         return @packages if @packages
         if File.exist?(args[0])
@@ -186,11 +195,13 @@ module Repo
 
         header "Bundling package #{package.name}"
         Dir.chdir(package.dir) do
-          cmd = ['bundle']
-          out, status = Open3.capture2(*cmd)
-          puts out
-          unless status.success?
-            raise RepoError, "Failed to bundle #{package.name}"
+          with_unbundled_env do
+            cmd = ['bundle']
+            out, status = Open3.capture2(*cmd)
+            puts out
+            unless status.success?
+              raise RepoError, "Failed to bundle #{package.name}"
+            end
           end
         end
       end
