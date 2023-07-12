@@ -131,6 +131,7 @@ module Repo
         packages.each do |package|
           if options.build && !package.built && !package.skip
             remove_artefacts(package)
+            bundle(package)
             clean(package)
             build(package)
           end
@@ -176,6 +177,20 @@ module Repo
           puts out
           unless status.success?
             raise RepoError, "Failed to clean #{package.name}"
+          end
+        end
+      end
+
+      def bundle(package)
+        return unless package.build_type == 'omnibus'
+
+        header "Bundling package #{package.name}"
+        Dir.chdir(package.dir) do
+          cmd = ['bundle']
+          out, status = Open3.capture2(*cmd)
+          puts out
+          unless status.success?
+            raise RepoError, "Failed to bundle #{package.name}"
           end
         end
       end
