@@ -33,7 +33,7 @@ module Repo
   module Commands
     class Promote < Command
       def run
-        if !Slack.auth?
+        if !Slack.auth? && !options.ignore_slack
           raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
         end
         dev.download
