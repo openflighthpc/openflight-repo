@@ -28,6 +28,7 @@ require_relative '../command'
 require_relative '../repository'
 require_relative '../arch'
 require_relative '../slack'
+require_relative '../gchat'
 
 require 'yaml'
 require 'open3'
@@ -300,8 +301,11 @@ module Repo
       end
 
       def assert_slack_token
-        if !Slack.auth?
+        if !Slack.auth? && !options.ignore_slack
           raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
+        end
+        if !GChat.auth? && !options.ignore_gchat
+          raise RepoError, "Valid GChat webhook not found; configure GCHAT_WEBHOOK environment variable"
         end
       end
     end

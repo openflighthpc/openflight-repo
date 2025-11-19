@@ -28,13 +28,17 @@ require_relative '../command'
 require_relative '../repository'
 require_relative '../arch'
 require_relative '../slack'
+require_relative '../gchat'
 
 module Repo
   module Commands
     class Publish < Command
       def run
-        if !Slack.auth?
+        if !Slack.auth? && !options.ignore_slack
           raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
+        end
+        if !GChat.auth? && !options.ignore_gchat
+          raise RepoError, "Valid GChat webhook not found; configure GCHAT_WEBHOOK environment variable"
         end
         if !clean_git?
           raise RepoError, "Uncommitted changes detected"
@@ -51,6 +55,13 @@ module Repo
           repo.upload
           files.each do |f|
             Slack.say(
+              File.basename(f),
+              "#{Config.name.downcase.tr(' ','-')}-dev/#{Config.distro} (#{arch.name})",
+              "https://s3.console.aws.amazon.com/s3/buckets/#{repo.bucket_path}/",
+              "#{repo.package_root_url}/#{File.basename(f)}",
+              false
+            )
+            GChat.say(
               File.basename(f),
               "#{Config.name.downcase.tr(' ','-')}-dev/#{Config.distro} (#{arch.name})",
               "https://s3.console.aws.amazon.com/s3/buckets/#{repo.bucket_path}/",

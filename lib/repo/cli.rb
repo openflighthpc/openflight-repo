@@ -71,6 +71,8 @@ module Repo
     global_option '--dry-run', "Don't synchronize any changes back to repos"
     global_option '-a', '--arch ARCH', String, 'Specify architecture (where necessary)'
     global_option '--config CONFIG', String, 'Specify config file name'
+    global_option '--ignore-slack', "Don't post to slack"
+    global_option '--ignore-gchat', "Don't post to google chat"
 
     command :publish do |c|
       cli_syntax(c, 'PACKAGE...')

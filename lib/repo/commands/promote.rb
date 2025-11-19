@@ -28,13 +28,17 @@ require_relative '../command'
 require_relative '../arch'
 require_relative '../repository'
 require_relative '../slack'
+require_relative '../gchat'
 
 module Repo
   module Commands
     class Promote < Command
       def run
-        if !Slack.auth?
+        if !Slack.auth? && !options.ignore_slack
           raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
+        end
+        if !GChat.auth? && !options.ignore_gchat
+          raise RepoError, "Valid GChat webhook not found; configure GCHAT_WEBHOOK environment variable"
         end
         dev.download
         sources = files.map{|f| dev.find(f)}.flatten.uniq
@@ -47,6 +51,13 @@ module Repo
           prod.upload
           sources.each do |f|
             Slack.say(
+              File.basename(f),
+              "#{Config.name.downcase.tr(' ','-')}/#{Config.distro} (#{arch.name})",
+              "https://s3.console.aws.amazon.com/s3/buckets/#{prod.bucket_path}/",
+              "#{prod.package_root_url}/#{File.basename(f)}",
+              true
+            )
+            GChat.say(
               File.basename(f),
               "#{Config.name.downcase.tr(' ','-')}/#{Config.distro} (#{arch.name})",
               "https://s3.console.aws.amazon.com/s3/buckets/#{prod.bucket_path}/",
