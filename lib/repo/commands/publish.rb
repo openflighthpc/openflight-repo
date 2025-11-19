@@ -28,6 +28,7 @@ require_relative '../command'
 require_relative '../repository'
 require_relative '../arch'
 require_relative '../slack'
+require_relative '../gchat'
 
 module Repo
   module Commands
