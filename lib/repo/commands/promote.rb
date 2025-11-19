@@ -57,6 +57,13 @@ module Repo
               "#{prod.package_root_url}/#{File.basename(f)}",
               true
             )
+            GChat.say(
+              File.basename(f),
+              "#{Config.name.downcase.tr(' ','-')}/#{Config.distro} (#{arch.name})",
+              "https://s3.console.aws.amazon.com/s3/buckets/#{prod.bucket_path}/",
+              "#{prod.package_root_url}/#{File.basename(f)}",
+              true
+            )
           end
         end
       end
