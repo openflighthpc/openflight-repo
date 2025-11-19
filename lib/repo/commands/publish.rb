@@ -36,6 +36,9 @@ module Repo
         if !Slack.auth? && !options.ignore_slack
           raise RepoError, "Valid Slack token not found; configure SLACK_TOKEN environment variable"
         end
+        if !GChat.auth? && !options.ignore_gchat
+          raise RepoError, "Valid GChat webhook not found; configure GCHAT_WEBHOOK environment variable"
+        end
         if !clean_git?
           raise RepoError, "Uncommitted changes detected"
         end
