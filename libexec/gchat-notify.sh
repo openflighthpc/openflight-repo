@@ -5,7 +5,8 @@ if [ "$PRODUCTION" == "true" ]; then
 else
   emoji="🔜"
   TITLE="$emoji $NAME Dev Package Published"
-  TREE="<b>Tree:</b> https://github.com/$BUILDER_REPO/tree/$(git rev-parse --short HEAD)"
+  TREE_URL="https://github.com/$BUILDER_REPO/tree/$(git rev-parse --short HEAD)"
+  TREE="<b>Tree:</b> <a href="$TREE_URL">$TREE_URL</a>"
 fi
 
 MESSAGE="<b>Name:</b> <code>$PACKAGE</code>
